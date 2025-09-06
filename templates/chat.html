@@ -1,1 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Iron Lady Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f4ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .chat-container { width: 400px; height: 600px; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+    .chat-header { background: #5a67d8; color: white; padding: 12px; text-align: center; font-weight: bold; }
+    .chatbox { flex: 1; padding: 10px; overflow-y: auto; }
+    .message { margin: 6px 0; }
+    .user .bubble { background: #5a67d8; color: white; border-radius: 12px; padding: 8px; text-align: right; display: inline-block; }
+    .bot .bubble { background: #e2e8f0; border-radius: 12px; padding: 8px; display: inline-block; }
+    .chat-input { display: flex; border-top: 1px solid #ddd; }
+    .chat-input input { flex: 1; border: none; padding: 10px; outline: none; }
+    .chat-input button { background: #5a67d8; color: white; border: none; padding: 10px 16px; cursor: pointer; }
+    .chat-input button:hover { background: #434190; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">💬 Iron Lady Chatbot</div>
+    <div id="chatbox" class="chatbox"></div>
+    <div class="chat-input">
+      <input id="message" placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
 
+  <script>
+    async function sendMessage() {
+      let msg = document.getElementById("message").value.trim();
+      if (!msg) return;
+
+      let chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += `<div class="message user"><div class="bubble">${msg}</div></div>`;
+      document.getElementById("message").value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      try {
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+
+        const data = await response.json();
+        chatbox.innerHTML += `<div class="message bot"><div class="bubble">${data.answer}</div></div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      } catch (err) {
+        chatbox.innerHTML += `<div class="message bot"><div class="bubble">⚠️ Error: Could not connect to server</div></div>`;
+      }
+    }
+  </script>
+</body>
+</html>
